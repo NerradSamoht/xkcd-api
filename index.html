@@ -27,6 +27,22 @@
 			background-color: #ddd;
 			cursor: pointer;
 		}
+		.title-tooltip {
+			display: none;
+			position:fixed;
+			top: 25%;
+			left: 25%;
+			background-color: #000;
+			color: #fff;
+			font-family: sans-serif;
+	    font-size: 0.9em;
+	    padding: 6px;
+	    max-width: 400px;
+			text-align: initial;
+		}
+		.title-tooltip p {
+			margin: 0;
+		}
 	</style>
 </head>
 <body>
@@ -70,10 +86,14 @@
 					success: function(data) {
 						max = data.num > max ? data.num : max;
 						var $title = '<h1>' + data.title;
-						var $image = $('<img>').attr({ src: data.img, title: data.alt, alt: data.title });
+						var $image = $('<img>').attr({ src: data.img, alt: data.title });
+						var $div = "<div class='title-tooltip'><p>" + data.alt;
 						$("#xkcd")
 							.html($title)
-							.append($image);
+							.append($image, $div);
+							$('img').on('click',function() {
+								$('.title-tooltip').toggle();
+							});
 					},
 					complete: function() {
 						$('button').show();
@@ -85,3 +105,4 @@
 	</script>
 </body>
 </html>
+<!-- test -->
