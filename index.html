@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+  <meta charset="utf-8">
+  <title>xkcd comic</title>
+  <meta name="description" content="Display the current or random xkcd.">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+	<style>
+		/* Viewport declarations */
+		@-ms-viewport { width: device-width; }
+		@-o-viewport  { width: device-width; }
+		@viewport     { width: device-width; }
+		html { box-sizing: border-box; }
+		*, *:before, *:after { box-sizing: inherit;	}
+		body { text-align: center; }
+		img { max-width: 100%; }
+		button {
+			display: none;
+			border: 2px solid black;
+			padding: 1em;
+			margin: 1em;
+			background-color: #fff;
+			font-family: "Comic Sans MS", cursive, sans-serif;
+			font-size: 0.8em;
+		}
+		button:hover {
+			background-color: #ddd;
+			cursor: pointer;
+		}
+	</style>
+</head>
+<body>
+	<div id='xkcd'></div>
+	<div id='buttons'>
+		<button id='current'>Current</button>
+		<button id='random'>Random</button>
+	</div>
+	<script src="http://code.jquery.com/jquery-2.1.4.min.js"></script>
+	<script>
+		$(function() {
+			var max = 0;
+			getxkcd();
+
+			$('#random').click(function() {
+				var num = Math.floor(Math.random() * max) + 1;
+				getxkcd(num);
+			});
+
+			$('#current').click(function() {
+				getxkcd();
+			});
+
+			function getxkcd(num) {
+				$('button').hide();
+				var url;
+				if (num) {
+					url = 'http://dynamic.xkcd.com/api-0/jsonp/comic/' + num;
+				} else {
+					url = 'http://dynamic.xkcd.com/api-0/jsonp/comic?callback=?';
+				}
+				$.ajax({
+					url: url,
+					data: {
+						format: 'json'
+					},
+					error: function() {
+						$('#xkcd').html("<p>Ruh roh! Something's not working.</p>");
+					},
+					dataType: 'jsonp',
+					success: function(data) {
+						max = data.num > max ? data.num : max;
+						var $title = '<h1>' + data.title;
+						var $image = $('<img>').attr({ src: data.img, title: data.alt, alt: data.title });
+						$("#xkcd")
+							.html($title)
+							.append($image);
+					},
+					complete: function() {
+						$('button').show();
+					},
+					type: 'GET'
+				});
+			};
+		});
+	</script>
+</body>
+</html>
