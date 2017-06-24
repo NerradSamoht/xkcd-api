@@ -3,45 +3,9 @@
 <head>
   <meta charset="utf-8">
   <title>xkcd comic</title>
-  <meta name="description" content="Displays the current or random xkcd.">
+  <meta name="description" content="Displays xkcd comic.">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-	<style>
-		@-ms-viewport { width: device-width; }
-		@-o-viewport  { width: device-width; }
-		@viewport     { width: device-width; }
-		* { box-sizing: border-box; }
-		body {
-			text-align: center;
-			font-family: "Comic Sans MS", cursive, sans-serif;
-		}
-		img {
-			max-width: 100%;
-		}
-		button {
-			border: 2px solid black;
-			padding: 1rem;
-			margin: 1rem;
-			background-color: #fff;
-			font-size: 1.1rem;
-		}
-		@media (min-width: 60rem) {
-			button {
-				width: 100%;
-				max-width: 160px;
-			}
-		}
-		button:hover {
-			background-color: #ddd;
-			cursor: pointer;
-		}
-		p {
-			font-size: 0.9em;
-			padding: 6px;
-			width: 100%;
-			max-width: 640px;
-			margin: 1rem auto;
-		}
-	</style>
+  <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
 	<div id="buttons">
@@ -51,79 +15,15 @@
 	<div id="xkcd"></div>
 	<div id="description"></div>
 	<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+	<script src="js/xkcd.js"></script>
+	<script src="js/main.js"></script>
 	<script>
-		var xkcd = (function() {
-
-			function loadContent(num) {
-				url = 'https://dynamic.xkcd.com/api-0/jsonp/comic';
-				// url = "http://xkcd.com/info.0.json"
-
-				if (num) {
-					url = url + '/' + num;
-				} else {
-					url = url + '?callback=?';
-				}
-
-				return Promise.resolve($.ajax(url, {
-					dataType: 'jsonp',
-					error: function() {
-						alert("Ruh roh! Sorry something went wrong.");
-					},
-					success: function(data) {
-						return data;
-					}
-				}));
-
-			};
-
-			return {
-				loadContent: loadContent
-			}
-
-		})();
-
-		var max = 0;
-
-		function structureContent(title, src,  desc) {
-			var $title = '<h1>' + title;
-			var $image = $('<img>').attr({ src: src, alt: title });
-			var $description = '<p>' + desc;
-
-			$('#xkcd').html($title).append($image);
-			$('#description').html($description);
-		}
-
-		function displayRandom() {
-			var num = Math.floor(Math.random() * max) + 1;
-			var promise = xkcd.loadContent(num);
-			// promise.then(data => structureContent(data.title, data.img, data.alt));
-			promise.then(function(data) {
-				console.log(data);
-				structureContent(data.title, data.img, data.alt);
-				console.log(max);
-			});
-		};
-
-
-		function displayCurrent() {
-			var promise = xkcd.loadContent();
-			// promise.then(data => structureContent(data.title, data.img, data.alt));
-			promise.then(function(data) {
-				console.log(data);
-				max = data.num > max ? data.num : max; // set current xkcd as highest number
-				console.log(max);
-				structureContent(data.title, data.img, data.alt);
-			});
-		}
-
-		$('#random').click(displayRandom);
-		$('#current').click(displayCurrent);
+		$('#random').click(xkcdController.displayRandomXKCD);
+		$('#current').click(xkcdController.displayCurrentXKCD);
 
 		$(document).ready(function() {
-			displayCurrent();
+			xkcdController.displayCurrentXKCD();
 		});
-
-
 	</script>
 </body>
 </html>
