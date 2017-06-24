@@ -10,12 +10,12 @@
 		@-o-viewport  { width: device-width; }
 		@viewport     { width: device-width; }
 		* { box-sizing: border-box; }
-		body { 
-			text-align: center; 
+		body {
+			text-align: center;
 			font-family: "Comic Sans MS", cursive, sans-serif;
 		}
-		img { 
-			max-width: 100%; 
+		img {
+			max-width: 100%;
 		}
 		button {
 			border: 2px solid black;
@@ -28,70 +28,102 @@
 			button {
 				width: 100%;
 				max-width: 160px;
-			}	
+			}
 		}
 		button:hover {
 			background-color: #ddd;
 			cursor: pointer;
 		}
 		p {
-	    	font-size: 0.9em;
-	    	padding: 6px;
+			font-size: 0.9em;
+			padding: 6px;
 			width: 100%;
-	    	max-width: 640px;
-    		margin: 1rem auto;
+			max-width: 640px;
+			margin: 1rem auto;
 		}
 	</style>
 </head>
 <body>
-	<div id='buttons'>
-		<button id='current'>Current</button>
-		<button id='random'>Random</button>
+	<div id="buttons">
+		<button id="current">Current</button>
+		<button id="random">Random</button>
 	</div>
-	<div id='xkcd'></div>
-	<div id='description'></div>
+	<div id="xkcd"></div>
+	<div id="description"></div>
 	<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 	<script>
-		$(function() {
-			var max = 0;
-			getxkcd();
+		var xkcd = (function() {
 
-			$('#random').click(function() {
-				var num = Math.floor(Math.random() * max) + 1;
-				getxkcd(num);
-			});
+			function loadContent(num) {
+				url = 'https://dynamic.xkcd.com/api-0/jsonp/comic';
+				// url = "http://xkcd.com/info.0.json"
 
-			$('#current').click(function() {
-				getxkcd();
-			});
-
-			function getxkcd(num) {
-				var url;
 				if (num) {
-					url = 'https://dynamic.xkcd.com/api-0/jsonp/comic/' + num;
+					url = url + '/' + num;
 				} else {
-					url = 'https://dynamic.xkcd.com/api-0/jsonp/comic?callback=?';
+					url = url + '?callback=?';
 				}
-				$.ajax({
-					url: url,
-					data: {
-						format: 'jsonp'
-					},
-					error: function() {
-						$('#xkcd').html("<p>Ruh roh! Something's not working.</p>");
-					},
+
+				return Promise.resolve($.ajax(url, {
 					dataType: 'jsonp',
+					error: function() {
+						alert("Ruh roh! Sorry something went wrong.");
+					},
 					success: function(data) {
-						max = data.num > max ? data.num : max;
-						var $title = '<h1>' + data.title;
-						var $image = $('<img>').attr({ src: data.img, alt: data.title });
-						var $description = '<p>' + data.alt;
-						$('#xkcd').html($title).append($image);
-						$('#description').append($description);
+						return data;
 					}
-				});
+				}));
+
 			};
+
+			return {
+				loadContent: loadContent
+			}
+
+		})();
+
+		var max = 0;
+
+		function structureContent(title, src,  desc) {
+			var $title = '<h1>' + title;
+			var $image = $('<img>').attr({ src: src, alt: title });
+			var $description = '<p>' + desc;
+
+			$('#xkcd').html($title).append($image);
+			$('#description').html($description);
+		}
+
+		function displayRandom() {
+			var num = Math.floor(Math.random() * max) + 1;
+			var promise = xkcd.loadContent(num);
+			// promise.then(data => structureContent(data.title, data.img, data.alt));
+			promise.then(function(data) {
+				console.log(data);
+				structureContent(data.title, data.img, data.alt);
+				console.log(max);
+			});
+		};
+
+
+		function displayCurrent() {
+			var promise = xkcd.loadContent();
+			// promise.then(data => structureContent(data.title, data.img, data.alt));
+			promise.then(function(data) {
+				console.log(data);
+				max = data.num > max ? data.num : max; // set current xkcd as highest number
+				console.log(max);
+				structureContent(data.title, data.img, data.alt);
+			});
+		}
+
+		$('#random').click(displayRandom);
+		$('#current').click(displayCurrent);
+
+		$(document).ready(function() {
+			displayCurrent();
 		});
+
+
 	</script>
 </body>
 </html>
