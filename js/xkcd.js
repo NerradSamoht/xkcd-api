@@ -1,7 +1,7 @@
 let xkcd = (function() {
 
     function loadContent(num) {
-        url = 'https://dynamic.xkcd.com/api-0/jsonp/comic';
+        let url = 'https://dynamic.xkcd.com/api-0/jsonp/comic';
         if (num) {
             url = url + '/' + num;
         };
@@ -19,5 +19,5 @@ let xkcd = (function() {
     return {
         loadContent: loadContent
     };
-    
+
 })();
